@@ -1,8 +1,14 @@
 const { resolve } = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// 抽离css
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+// 压缩css
+const cssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
+
+// 设置nodejs环境变量
+process.env.NODE_ENV = 'development';
 
 module.exports = {
 	entry: './src/js/index.js',
@@ -15,12 +21,19 @@ module.exports = {
 			{
 				test: /\.css$/,
 				use: [
-					// 创建style标签，将样式放入
-					// 'style-loader', 
-					// MiniCssExtractPlugin.loader 取代style-loader. 用于提取js中的css成单独文件
 					MiniCssExtractPlugin.loader,
-					// 将css文件整合到js文件中
-					'css-loader'
+					'css-loader',
+					{
+						loader: 'postcss-loader',
+						options: {
+							postcssOptions: {
+								ident: 'postcss',
+								plugins: () => {
+									require('postcss-preset-env')()
+								}
+							}
+						}
+					}
 				]
 			}
 		]
@@ -31,7 +44,8 @@ module.exports = {
 		}),
 		new MiniCssExtractPlugin({
 			filename: 'css/build.css'
-		})
+		}),
+		new cssMinimizerWebpackPlugin()
 	],
 	mode: 'development'
 }
